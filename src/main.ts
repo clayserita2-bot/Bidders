@@ -31,7 +31,7 @@ function auth(signup=false){
   const msg=document.querySelector('#msg')!; if(!supabase){msg.innerHTML='<div class="error">Supabase connection key is not configured yet.</div>';return}
   const email=(document.querySelector('#email') as HTMLInputElement).value.trim(), password=(document.querySelector('#password') as HTMLInputElement).value
   try{
-   if(signup){ const name=(document.querySelector('#name') as HTMLInputElement).value.trim(), company=(document.querySelector('#company') as HTMLInputElement).value.trim(); const r=await supabase.auth.signUp({email,password,options:{data:{full_name:name,company_name:company}}}); if(r.error) throw r.error; msg.innerHTML='<div class="success">Account created. Check your email if confirmation is required.</div>'; if(r.data.session){user=r.data.user;nav('dashboard')} }
+   if(signup){ const name=(document.querySelector('#name') as HTMLInputElement).value.trim(), company=(document.querySelector('#company') as HTMLInputElement).value.trim(); const r=await supabase.auth.signUp({email,password,options:{data:{full_name:name,company_name:company},emailRedirectTo:window.location.origin+'/'}}}); if(r.error) throw r.error; msg.innerHTML='<div class="success">Account created. Check your email if confirmation is required.</div>'; if(r.data.session){user=r.data.user;nav('dashboard')} }
    else {const r=await supabase.auth.signInWithPassword({email,password}); if(r.error)throw r.error; user=r.data.user;nav('dashboard')}
   }catch(e:any){msg.innerHTML='<div class="error">'+esc(e.message||'Something went wrong')+'</div>'}
  })
