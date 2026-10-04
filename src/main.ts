@@ -11,6 +11,7 @@ let page = 'home'
 
 const esc = (s:string) => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!))
 const nav = (p:string) => { page=p; render() }
+const toast = (message:string,bad=false) => { const x=document.createElement('div'); x.className='toast'+(bad?' bad':''); x.textContent=message; document.body.appendChild(x); setTimeout(()=>x.remove(),3000) }
 
 function landing(){
   root.innerHTML = `
