@@ -114,7 +114,7 @@ function opportunityCard(x:any,score?:number){
 
 async function bids(){
  shell('Find Bids','bids',`<div class="pageintro"><small class="eyebrow">LIVE OPPORTUNITY MARKETPLACE</small><h1>Find Bids</h1><p>Search across connected opportunities and filter by industry, location and deadline.</p></div>
- <div class="toolbar"><input id="search" placeholder="Search title, buyer, keyword..."><select id="category"><option value="">All categories</option></select><select id="state"><option value="">All locations</option><option>Ohio</option><option>Nationwide</option><option>United States</option></select></div><div id="bidList">Loading opportunities...</div>`)
+ <div class="toolbar"><input id="search" placeholder="Search title, buyer, keyword..."><select id="category"><option value="">All categories</option><option>Construction</option><option>Transportation</option><option>Medical Supplies</option><option>Healthcare Services</option><option>Professional Services</option><option>Facilities & Janitorial</option><option>Information Technology</option><option>Education</option><option>Food Services</option><option>Security</option><option>Other</option></select><select id="state"><option value="">All locations</option><option>Ohio</option><option>Nationwide</option><option>United States</option></select></div><div id="bidList">Loading opportunities...</div>`)
  const r=await supabase.from('bid_opportunities').select('*').eq('status','open').order('deadline',{ascending:true}).limit(100)
  const list=r.data||[]
  const cats=[...new Set(list.map((x:any)=>x.category).filter(Boolean))] as string[]
