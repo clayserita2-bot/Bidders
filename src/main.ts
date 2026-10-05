@@ -160,10 +160,21 @@ async function listPage(p:string){
  if(p==='saved'){
   html=r.data?.length?'<div class="opp-list">'+r.data.map((x:any)=>opportunityCard(x.bid_opportunities||{},undefined)).join('')+'</div>':'<div class="empty">You have no saved bids yet. <button class="btn primary" data-p="bids">Find bids</button></div>'
  }else{
-  html=r.data?.length?'<div class="list-card card">'+r.data.map((x:any)=>{const o=x.bid_opportunities||{};return '<div class="list-row"><div><b>'+esc(o.title||'Opportunity')+'</b><span>'+esc(o.agency_name||'')+' · Due '+date(o.deadline)+'</span></div><div><strong>'+esc(x.status)+'</strong></div></div>'}).join('')+'</div>':'<div class="empty">No applications yet. <button class="btn primary" data-p="bids">Find a bid</button></div>'
+  html=r.data?.length?'<div class="application-list">'+r.data.map((x:any)=>{const o=x.bid_opportunities||{};return '<div class="card application-card" data-app="'+x.id+'"><div class="opp-top"><div><span class="tag">'+esc(o.category||'Bid')+'</span><h2>'+esc(o.title||'Opportunity')+'</h2><p><b>'+esc(o.agency_name||'Buyer')+'</b> · Due '+date(o.deadline)+'</p></div><strong>'+esc(x.status)+'</strong></div><div class="form-grid"><label>Status<select class="app-status"><option value="planning" '+(x.status==='planning'?'selected':'')+'>Planning</option><option value="in_progress" '+(x.status==='in_progress'?'selected':'')+'>In progress</option><option value="submitted" '+(x.status==='submitted'?'selected':'')+'>Submitted</option><option value="under_review" '+(x.status==='under_review'?'selected':'')+'>Under review</option><option value="awarded" '+(x.status==='awarded'?'selected':'')+'>Awarded</option><option value="not_awarded" '+(x.status==='not_awarded'?'selected':'')+'>Not awarded</option></select></label><label>Deadline<input class="app-deadline" type="date" value="'+(x.due_date?String(x.due_date).slice(0,10):'')+'"></label></div><label class="app-notes-label">Application notes / proposal notes<textarea class="app-notes" rows="7" placeholder="Enter your proposal notes, pricing notes, requirements, questions, and next steps...">'+esc(x.notes||'')+'</textarea></label><div class="opp-actions"><button class="btn primary save-application">Save application</button><a class="btn ghost" target="_blank" rel="noopener" href="'+esc(o.source_url||'#')+'">View bid source ↗</a></div><div class="app-msg"></div></div>}).join('')+'</div>':'<div class="empty">No applications yet. <button class="btn primary" data-p="bids">Find a bid</button></div>'
  }
  shell(p==='saved'?'Saved Bids':'Applications',p,`<div class="pageintro"><small class="eyebrow">PIPELINE</small><h1>${p==='saved'?'Saved Bids':'Applications'}</h1><p>${p==='saved'?'Opportunities you want to revisit.':'Track every opportunity you have started, submitted or won.'}</p></div>${html}`)
  bindBidButtons()
+ document.querySelectorAll<HTMLButtonElement>('.save-application').forEach(b=>b.addEventListener('click',async()=>{
+   const card=b.closest<HTMLElement>('.application-card')!
+   const id=card.dataset.app!
+   const status=(card.querySelector('.app-status') as HTMLSelectElement).value
+   const due=(card.querySelector('.app-deadline') as HTMLInputElement).value
+   const notes=(card.querySelector('.app-notes') as HTMLTextAreaElement).value
+   const r=await supabase.from('bid_applications').update({status,due_date:due?new Date(due+'T23:59:59').toISOString():null,notes,submitted_at:status==='submitted'?new Date().toISOString():null}).eq('id',id).eq('user_id',user.id)
+   const msg=card.querySelector('.app-msg')!
+   msg.innerHTML=r.error?'<div class="error">'+esc(r.error.message)+'</div>':'<div class="success">Application saved.</div>'
+   if(!r.error){await supabase.from('notifications').insert({user_id:user.id,type:'application_updated',title:'Application updated',message:'Your BidBidder application was updated.',application_id:id})}
+ }))
 }
 
 async function notifications(){
