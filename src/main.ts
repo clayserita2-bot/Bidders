@@ -39,10 +39,12 @@ function landing(){
   <section class="hero"><div><small class="eyebrow">AI-POWERED BID DISCOVERY</small><h1>Find bids.<br><em>Win more business.</em></h1><p>BidBidder helps businesses discover real procurement opportunities, match them to your business, manage applications, and get AI guidance at every step.</p><div class="hero-actions"><button class="btn primary big" id="heroSignup">Start finding bids →</button></div><small>No complicated setup. Built for growing businesses.</small></div>
   <div class="hero-card"><div class="mini-head"><b>AI Match Center</b><span class="live">● LIVE</span></div><div class="match"><div><b>Transportation Services</b><small>Government</small></div><strong>96%</strong></div><div class="match"><div><b>Medical Supply Contract</b><small>Healthcare</small></div><strong>91%</strong></div><div class="match"><div><b>Professional Services</b><small>Education</small></div><strong>87%</strong></div><div class="ai-tip">✦ <span>AI Agent: I can help you find, review and track opportunities.</span></div></div></section>
   <section class="features"><div><span>01</span><h3>Real opportunities</h3><p>Browse procurement opportunities with source links and deadlines.</p></div><div><span>02</span><h3>Smart matching</h3><p>Match bids against your services, keywords and service areas.</p></div><div><span>03</span><h3>Application tracking</h3><p>Save bids, start applications and keep every deadline organized.</p></div><div><span>04</span><h3>AI bid agent</h3><p>Ask for bid guidance, requirements, next steps and best matches.</p></div></section>
+  <section class="category-strip"><h2>Businesses BidBidder can help</h2><p>Start with your industry, then let BidBidder find opportunities that fit.</p><div class="category-grid"><button class="category-chip" data-category="Transportation & NEMT"><b>01</b><span>Transportation & NEMT</span> →</button><button class="category-chip" data-category="Medical Supplies & DME"><b>02</b><span>Medical Supplies & DME</span> →</button><button class="category-chip" data-category="Healthcare Services"><b>03</b><span>Healthcare Services</span> →</button><button class="category-chip" data-category="Adult Day & Human Services"><b>04</b><span>Adult Day & Human Services</span> →</button><button class="category-chip" data-category="Construction"><b>05</b><span>Construction</span> →</button><button class="category-chip" data-category="Facilities & Janitorial"><b>06</b><span>Facilities & Janitorial</span> →</button><button class="category-chip" data-category="Information Technology"><b>07</b><span>Information Technology</span> →</button><button class="category-chip" data-category="Education"><b>08</b><span>Education</span> →</button><button class="category-chip" data-category="Food Services"><b>09</b><span>Food Services</span> →</button><button class="category-chip" data-category="Security"><b>10</b><span>Security</span> →</button><button class="category-chip" data-category="Professional Services"><b>11</b><span>Professional Services</span> →</button><button class="category-chip" data-category="Other"><b>12</b><span>Other</span> →</button></div></section>
   <footer>© 2026 BidBidder. Find. Match. Win.</footer>
  </div>`
  document.querySelector('#login')?.addEventListener('click',()=>auth(false))
  document.querySelectorAll('#signup,#heroSignup').forEach(b=>b.addEventListener('click',()=>auth(true)))
+ document.querySelectorAll('.category-chip').forEach(b=>b.addEventListener('click',()=>auth(true)))
 }
 
 function auth(signup=false){
@@ -60,7 +62,7 @@ function auth(signup=false){
     const name=(document.querySelector('#name') as HTMLInputElement).value.trim(),company=(document.querySelector('#company') as HTMLInputElement).value.trim()
     const r=await supabase.auth.signUp({email,password,options:{data:{full_name:name,company_name:company},emailRedirectTo:window.location.origin+'/'}})
     if(r.error)throw r.error
-    msg.innerHTML='<div class="success">Account created. Check your email if confirmation is required.</div>'
+    msg.innerHTML='<div class="success">Account created. If email confirmation is enabled, open the confirmation email, then return here and log in. If confirmation is disabled, you will enter the dashboard automatically.</div>'
     if(r.data.session){user=r.data.user;await ensureProfile();nav('dashboard')}
    }else{
     const r=await supabase.auth.signInWithPassword({email,password})
@@ -116,6 +118,7 @@ async function bids(){
  shell('Find Bids','bids',`<div class="pageintro"><small class="eyebrow">LIVE OPPORTUNITY MARKETPLACE</small><h1>Find Bids</h1><p>Search across connected opportunities and filter by industry, location and deadline.</p></div>
  <div class="toolbar"><input id="search" placeholder="Search title, buyer, keyword..."><select id="category"><option value="">All categories</option><option>Construction</option><option>Transportation</option><option>Medical Supplies</option><option>Healthcare Services</option><option>Professional Services</option><option>Facilities & Janitorial</option><option>Information Technology</option><option>Education</option><option>Food Services</option><option>Security</option><option>Other</option></select><select id="state"><option value="">All locations</option><option>Ohio</option><option>Nationwide</option><option>United States</option></select></div><div id="bidList">Loading opportunities...</div>`)
  const r=await supabase.from('bid_opportunities').select('*').eq('status','open').order('deadline',{ascending:true}).limit(100)
+ if(r.error){shell('Find Bids','bids',`<div class="pageintro"><small class="eyebrow">OPPORTUNITY MARKETPLACE</small><h1>Find Bids</h1><div class="error">Bid data could not be loaded: ${esc(r.error.message)}. Your account is safe; this is a database access/configuration issue.</div><button class="btn primary" data-p="support">Contact support</button></div>`);return}
  const list=r.data||[]
  const cats=[...new Set(list.map((x:any)=>x.category).filter(Boolean))] as string[]
  const sel=document.querySelector('#category') as HTMLSelectElement
@@ -147,6 +150,7 @@ function scoreBid(o:any,p:any){
 async function matches(){
  const {data:p}=await supabase.from('business_profiles').select('*').eq('user_id',user.id).maybeSingle()
  const r=await supabase.from('bid_opportunities').select('*').eq('status','open').order('deadline',{ascending:true}).limit(100)
+ if(r.error){shell('AI Match Center','matches',`<div class="pageintro"><h1>AI Match Center</h1><div class="error">Matching could not load opportunities: ${esc(r.error.message)}</div></div>`);return}
  const scored=(r.data||[]).map((x:any)=>({...x,...scoreBid(x,p)})).sort((a:any,b:any)=>b.score-a.score)
  for(const x of scored.slice(0,20)) await supabase.from('bid_matches').upsert({user_id:user.id,opportunity_id:x.id,match_score:x.score,match_reasons:x.reasons,status:'new'},{onConflict:'user_id,opportunity_id'})
  shell('AI Match Center','matches',`<div class="pageintro"><small class="eyebrow">PERSONALIZED MATCHING</small><h1>AI Match Center</h1><p>These scores use your business profile, services, keywords, service areas and industry.</p></div><div class="card"><b>${scored.length}</b> open opportunities scored for you. <button class="btn ghost" data-p="profile">Improve my profile</button></div><div class="opp-list" style="margin-top:15px">${scored.slice(0,20).map((x:any)=>opportunityCard(x,x.score)).join('')}</div>`)
