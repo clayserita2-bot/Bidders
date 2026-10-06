@@ -51,8 +51,14 @@ function auth(signup=false){
  root.innerHTML=`<div class="auth"><div class="auth-box"><div class="brand center"><b>◆</b> Bid<span>Bidder</span></div><h1>${signup?'Create your account':'Welcome back'}</h1><p>${signup?'Start finding real opportunities.':'Sign in to your BidBidder account.'}</p>
  ${signup?'<input id="name" placeholder="Your name"><input id="company" placeholder="Company name">':''}
  <input id="email" type="email" placeholder="Email"><input id="password" type="password" placeholder="Password">
- <button class="btn primary full" id="submit">${signup?'Create account':'Log in'}</button><button class="text-btn" id="back">← Back</button><div id="msg"></div></div></div>`
+ <button class="btn primary full" id="submit">${signup?'Create account':'Log in'}</button>${!signup?'<button class="text-btn" id="reset">Forgot password?</button>':''}<button class="text-btn" id="back">← Back</button><div id="msg"></div></div></div>`
  document.querySelector('#back')!.addEventListener('click',landing)
+ document.querySelector('#reset')?.addEventListener('click',async()=>{
+  const email=(document.querySelector('#email') as HTMLInputElement).value.trim(); const msg=document.querySelector('#msg')!
+  if(!email){msg.innerHTML='<div class="error">Enter your email address first, then tap Forgot password.</div>';return}
+  const r=await supabase.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+'/'})
+  msg.innerHTML=r.error?'<div class="error">'+esc(r.error.message)+'</div>':'<div class="success">If that email has a BidBidder account, a password-reset email has been sent. Check your inbox and spam folder.</div>'
+ })
  document.querySelector('#submit')!.addEventListener('click',async()=>{
   const msg=document.querySelector('#msg')!
   const email=(document.querySelector('#email') as HTMLInputElement).value.trim()
@@ -66,7 +72,17 @@ function auth(signup=false){
     if(r.data.session){user=r.data.user;await ensureProfile();nav('dashboard')}
    }else{
     const r=await supabase.auth.signInWithPassword({email,password})
-    if(r.error)throw r.error
+    if(r.error){
+      const m=String(r.error.message||'')
+      if(/email not confirmed/i.test(m)){
+        const resend=await supabase.auth.resend({type:'signup',email})
+        msg.innerHTML='<div class="error">Your email has not been confirmed yet. '+(resend.error?esc(resend.error.message):'A new confirmation email was sent. Check your inbox and spam folder, then return and log in.')+'</div>';return
+      }
+      if(/invalid login credentials/i.test(m)){
+        msg.innerHTML='<div class="error">The email or password does not match. Check both fields, or use <b>Forgot password?</b> below.</div>';return
+      }
+      throw r.error
+    }
     user=r.data.user;await ensureProfile();nav('dashboard')
    }
   }catch(e:any){msg.innerHTML='<div class="error">'+esc(e.message||'Something went wrong')+'</div>'}
