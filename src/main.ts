@@ -8,12 +8,14 @@ const supabase = createClient(url, key)
 const root = document.querySelector<HTMLDivElement>('#root')!
 let user:any = null
 let page = 'home'
+let preferredCategory = ''
 
 const esc=(s:any)=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!))
 const money=(n:any)=>n==null?'':new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(Number(n))
 const date=(d:any)=>d?new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'No deadline'
 const toast=(message:string,bad=false)=>{const x=document.createElement('div');x.className='toast'+(bad?' bad':'');x.textContent=message;document.body.appendChild(x);setTimeout(()=>x.remove(),3200)}
 const nav=(p:string)=>{page=p;render()}
+const safeUrl=(value:any)=>{try{const u=new URL(String(value));return ['http:','https:'].includes(u.protocol)?u.href:''}catch{return ''}}
 
 async function ensureProfile(){
   if(!user)return
@@ -25,7 +27,7 @@ async function ensureProfile(){
   const {data:bp}=await supabase.from('business_profiles').select('*').eq('user_id',user.id).maybeSingle()
   if(!bp){
     await supabase.from('business_profiles').insert({
-      user_id:user.id,legal_name:meta.company_name||p?.company_name||'',
+      user_id:user.id,legal_name:meta.company_name||p?.company_name||'',industry:meta.preferred_category||'',
       services:[],certifications:[],service_areas:[],keywords:[],readiness_score:0,
       country_code:'US',preferred_currency:'USD',preferred_language:'en'
     })
@@ -44,7 +46,7 @@ function landing(){
  </div>`
  document.querySelector('#login')?.addEventListener('click',()=>auth(false))
  document.querySelectorAll('#signup,#heroSignup').forEach(b=>b.addEventListener('click',()=>auth(true)))
- document.querySelectorAll('.category-chip').forEach(b=>b.addEventListener('click',()=>auth(true)))
+ document.querySelectorAll<HTMLButtonElement>('.category-chip').forEach(b=>b.addEventListener('click',()=>{preferredCategory=b.dataset.category||'';auth(true)}))
 }
 
 function auth(signup=false){
@@ -66,7 +68,7 @@ function auth(signup=false){
   try{
    if(signup){
     const name=(document.querySelector('#name') as HTMLInputElement).value.trim(),company=(document.querySelector('#company') as HTMLInputElement).value.trim()
-    const r=await supabase.auth.signUp({email,password,options:{data:{full_name:name,company_name:company},emailRedirectTo:window.location.origin+'/'}})
+    const r=await supabase.auth.signUp({email,password,options:{data:{full_name:name,company_name:company,preferred_category:preferredCategory},emailRedirectTo:window.location.origin+'/'}})
     if(r.error)throw r.error
     msg.innerHTML='<div class="success">Account created. If email confirmation is enabled, open the confirmation email, then return here and log in. If confirmation is disabled, you will enter the dashboard automatically.</div>'
     if(r.data.session){user=r.data.user;await ensureProfile();nav('dashboard')}
@@ -100,8 +102,10 @@ function shell(title:string,active:string,content:string){
  <button class="nav ${active==='notifications'?'active':''}" data-p="notifications">♢ Notifications <i id="noteCount"></i></button>
  <button class="nav ${active==='profile'?'active':''}" data-p="profile">◎ Business Profile</button>
  <div class="sidebottom"><button class="nav" data-p="support">? Help & Support</button><button class="nav" id="signout">↪ Sign out</button></div></aside>
- <main><header><b>${title}</b><span>${esc(user?.email||'')}</span></header><section class="page">${content}</section></main></div>`
+ <main><header><button class="mobile-menu" id="mobileNav" aria-label="Toggle navigation">☰</button><b>${title}</b><span>${esc(user?.email||'')}</span></header><section class="page">${content}</section></main></div>`
  bindNav()
+ document.querySelector('#mobileNav')?.addEventListener('click',()=>document.querySelector('.app aside')?.classList.toggle('mobile-open'))
+ document.querySelectorAll('.app aside [data-p]').forEach(x=>x.addEventListener('click',()=>document.querySelector('.app aside')?.classList.remove('mobile-open')))
  document.querySelector('#signout')?.addEventListener('click',async()=>{await supabase.auth.signOut();user=null;landing()})
  loadUnread()
 }
@@ -127,7 +131,7 @@ async function dashboard(){
 function opportunityCard(x:any,score?:number){
  return `<article class="opp"><div class="score">${score??'—'}<small>% MATCH</small></div><div class="opp-main"><div class="opp-top"><div><span class="tag">${esc(x.category||'Other')}</span><h2>${esc(x.title)}</h2><p><b>${esc(x.agency_name||'Buyer')}</b> · ${esc(x.location||'Location')}</p></div><strong>${x.deadline?'Due '+date(x.deadline):'Open'}</strong></div>
  <p class="desc">${esc(x.description||'No description available.')}</p><div class="opp-meta"><span>Type: ${esc(x.opportunity_type||'RFP')}</span><span>Posted: ${date(x.posted_at)}</span>${x.estimated_value?'<span>Value: '+money(x.estimated_value)+'</span>':''}</div>
- <div class="opp-actions"><button class="btn primary apply" data-id="${x.id}">Start application</button><button class="btn ghost save" data-id="${x.id}">☆ Save</button>${x.source_url?'<a class="btn ghost" target="_blank" rel="noopener" href="'+esc(x.source_url)+'">View source ↗</a>':''}</div></div></article>`
+ <div class="opp-actions"><button class="btn primary apply" data-id="${x.id}">Start application</button><button class="btn ghost save" data-id="${x.id}">☆ Save</button>${safeUrl(x.source_url)?'<a class="btn ghost" target="_blank" rel="noopener noreferrer" href="'+esc(safeUrl(x.source_url))+'">View source ↗</a>':''}</div></div></article>`
 }
 
 async function bids(){
