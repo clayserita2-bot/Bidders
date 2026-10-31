@@ -180,14 +180,39 @@ async function matches(){
 async function listPage(p:string){
  const table=p==='saved'?'saved_opportunities':'bid_applications'
  const r=await supabase.from(table).select('*, bid_opportunities(*)').eq('user_id',user.id).order('created_at',{ascending:false}).limit(100)
+ if(r.error){
+  shell(p==='saved'?'Saved Bids':'Applications',p,`<div class="pageintro"><h1>${p==='saved'?'Saved Bids':'Applications'}</h1><div class="error">${esc(r.error.message)}</div></div>`)
+  return
+ }
  let html=''
  if(p==='saved'){
   html=r.data?.length?'<div class="opp-list">'+r.data.map((x:any)=>opportunityCard(x.bid_opportunities||{},undefined)).join('')+'</div>':'<div class="empty">You have no saved bids yet. <button class="btn primary" data-p="bids">Find bids</button></div>'
  }else{
-  html=r.data?.length?'<div class="list-card card">'+r.data.map((x:any)=>{const o=x.bid_opportunities||{};return '<div class="list-row"><div><b>'+esc(o.title||'Opportunity')+'</b><span>'+esc(o.agency_name||'')+' · Due '+date(o.deadline)+'</span></div><div><strong>'+esc(x.status)+'</strong></div></div>'}).join('')+'</div>':'<div class="empty">No applications yet. <button class="btn primary" data-p="bids">Find a bid</button></div>'
+  const statuses=['planning','in_progress','submitted','under_review','awarded','not_awarded']
+  html=r.data?.length?'<div class="application-list">'+r.data.map((x:any)=>{
+   const o=x.bid_opportunities||{}
+   const due=x.due_date?new Date(x.due_date).toISOString().slice(0,10):''
+   return '<article class="application-card card" data-application="'+esc(x.id)+'"><div class="card-head"><div><span class="tag">'+esc(o.category||'Opportunity')+'</span><h2>'+esc(o.title||'Opportunity')+'</h2><p>'+esc(o.agency_name||'')+' · Buyer deadline: '+date(o.deadline)+'</p></div></div><div class="form-grid"><label>Application status<select class="application-status">'+statuses.map((s:string)=>'<option value="'+s+'" '+(x.status===s?'selected':'')+'>'+s.replace(/_/g,' ')+'</option>').join('')+'</select></label><label>Your working due date<input class="application-due" type="date" value="'+esc(due)+'"></label></div><label>Notes and next steps<textarea class="application-notes" rows="4" placeholder="Requirements to confirm, documents needed, contacts, next steps...">'+esc(x.notes||'')+'</textarea></label><button class="btn primary save-application" data-id="'+esc(x.id)+'">Save application</button><div class="app-msg" aria-live="polite"></div></article>'
+  }).join('')+'</div>':'<div class="empty">No applications yet. <button class="btn primary" data-p="bids">Find a bid</button></div>'
  }
- shell(p==='saved'?'Saved Bids':'Applications',p,`<div class="pageintro"><small class="eyebrow">PIPELINE</small><h1>${p==='saved'?'Saved Bids':'Applications'}</h1><p>${p==='saved'?'Opportunities you want to revisit.':'Track every opportunity you have started, submitted or won.'}</p></div>${html}`)
+ shell(p==='saved'?'Saved Bids':'Applications',p,`<div class="pageintro"><small class="eyebrow">PIPELINE</small><h1>${p==='saved'?'Saved Bids':'Applications'}</h1><p>${p==='saved'?'Opportunities you want to revisit.':'Update application status, working deadlines, notes and next steps as you prepare each bid.'}</p></div>${html}`)
  bindBidButtons()
+ if(p==='applications'){
+  document.querySelectorAll<HTMLButtonElement>('.save-application').forEach(button=>button.addEventListener('click',async()=>{
+   const card=button.closest<HTMLElement>('.application-card')
+   if(!card)return
+   const status=(card.querySelector('.application-status') as HTMLSelectElement).value
+   const due=(card.querySelector('.application-due') as HTMLInputElement).value
+   const notes=(card.querySelector('.application-notes') as HTMLTextAreaElement).value.trim()
+   const current=r.data?.find((x:any)=>x.id===button.dataset.id)
+   const changes:any={status,notes,due_date:due?new Date(due+'T12:00:00').toISOString():null,updated_at:new Date().toISOString()}
+   if(status==='submitted'&&!current?.submitted_at)changes.submitted_at=new Date().toISOString()
+   const result=await supabase.from('bid_applications').update(changes).eq('id',button.dataset.id).eq('user_id',user.id)
+   const message=card.querySelector('.app-msg')!
+   message.innerHTML=result.error?'<div class="error">'+esc(result.error.message)+'</div>':'<div class="success">Application updated.</div>'
+   if(!result.error)toast('Application updated.')
+  }))
+ }
 }
 
 async function notifications(){
