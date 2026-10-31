@@ -39,7 +39,7 @@ function landing(){
  <div class="landing">
   <nav><div class="brand"><b>◆</b> Bid<span>Bidder</span></div><div><button class="btn ghost" id="login">Log in</button> <button class="btn primary" id="signup">Get started</button></div></nav>
   <section class="hero"><div><small class="eyebrow">PROCUREMENT OPPORTUNITY DISCOVERY</small><h1>Find bids.<br><em>Win more business.</em></h1><p>BidBidder helps businesses discover real procurement opportunities, match them to your business, manage applications, and get AI guidance at every step.</p><div class="hero-actions"><button class="btn primary big" id="heroSignup">Start finding bids →</button></div><small>No complicated setup. Built for growing businesses.</small></div>
-  <div class="hero-card"><div class="mini-head"><b>AI Match Center</b><span class="live">PROFILE MATCHING</span></div><div class="match"><div><b>Transportation Services</b><small>Government</small></div><strong>Example</strong></div><div class="match"><div><b>Medical Supply Contract</b><small>Healthcare</small></div><strong>Example</strong></div><div class="match"><div><b>Professional Services</b><small>Education</small></div><strong>Example</strong></div><div class="ai-tip">✦ <span>AI Agent: I can help you find, review and track opportunities.</span></div></div></section>
+  <div class="hero-card"><div class="mini-head"><b>Profile Match Center</b><span class="live">PROFILE MATCHING</span></div><div class="match"><div><b>Transportation Services</b><small>Government</small></div><strong>Example</strong></div><div class="match"><div><b>Medical Supply Contract</b><small>Healthcare</small></div><strong>Example</strong></div><div class="match"><div><b>Professional Services</b><small>Education</small></div><strong>Example</strong></div><div class="ai-tip">✦ <span>AI Agent: I can help you find, review and track opportunities.</span></div></div></section>
   <section class="features"><div><span>01</span><h3>Source-linked opportunities</h3><p>Browse source-linked procurement notices and deadlines. Confirm current status, amendments and eligibility with the buyer.</p></div><div><span>02</span><h3>Smart matching</h3><p>Match bids against your services, keywords and service areas.</p></div><div><span>03</span><h3>Application tracking</h3><p>Save bids, start applications and keep every deadline organized.</p></div><div><span>04</span><h3>AI bid agent</h3><p>Ask for bid guidance, requirements, next steps and best matches.</p></div></section>
   <section class="category-strip"><h2>Businesses BidBidder can help</h2><p>Start with your industry, then let BidBidder find opportunities that fit.</p><div class="category-grid"><button class="category-chip" data-category="Transportation & NEMT"><b>01</b><span>Transportation & NEMT</span> →</button><button class="category-chip" data-category="Medical Supplies & DME"><b>02</b><span>Medical Supplies & DME</span> →</button><button class="category-chip" data-category="Healthcare Services"><b>03</b><span>Healthcare Services</span> →</button><button class="category-chip" data-category="Adult Day & Human Services"><b>04</b><span>Adult Day & Human Services</span> →</button><button class="category-chip" data-category="Construction"><b>05</b><span>Construction</span> →</button><button class="category-chip" data-category="Facilities & Janitorial"><b>06</b><span>Facilities & Janitorial</span> →</button><button class="category-chip" data-category="Information Technology"><b>07</b><span>Information Technology</span> →</button><button class="category-chip" data-category="Education"><b>08</b><span>Education</span> →</button><button class="category-chip" data-category="Food Services"><b>09</b><span>Food Services</span> →</button><button class="category-chip" data-category="Security"><b>10</b><span>Security</span> →</button><button class="category-chip" data-category="Professional Services"><b>11</b><span>Professional Services</span> →</button><button class="category-chip" data-category="Other"><b>12</b><span>Other</span> →</button></div></section>
   <footer>© 2026 BidBidder. Find. Match. Win.</footer>
@@ -98,7 +98,7 @@ function shell(title:string,active:string,content:string){
  <button class="nav ${active==='matches'?'active':''}" data-p="matches">✦ AI Match Center</button>
  <button class="nav ${active==='saved'?'active':''}" data-p="saved">☆ Saved</button>
  <button class="nav ${active==='applications'?'active':''}" data-p="applications">✓ Applications</button>
- <button class="nav ${active==='agent'?'active':''}" data-p="agent">✧ AI Bid Agent</button>
+ <button class="nav ${active==='agent'?'active':''}" data-p="agent">✧ Bid Guidance Assistant</button>
  <button class="nav ${active==='notifications'?'active':''}" data-p="notifications">♢ Notifications <i id="noteCount"></i></button>
  <button class="nav ${active==='profile'?'active':''}" data-p="profile">◎ Business Profile</button>
  <div class="sidebottom"><button class="nav" data-p="support">? Help & Support</button><button class="nav" id="signout">↪ Sign out</button></div></aside>
@@ -120,18 +120,19 @@ async function dashboard(){
   supabase.from('notifications').select('*',{count:'exact',head:true}).eq('user_id',user.id).is('read_at',null)
  ])
  shell('Dashboard','dashboard',`
- <div class="welcome"><div><small class="eyebrow">YOUR BIDBIDDER COMMAND CENTER</small><h1>Let's win some business.</h1><p>Real opportunities, matches, applications and alerts in one place.</p></div><button class="btn primary" data-p="bids">Find new bids →</button></div>
+ <div class="welcome"><div><small class="eyebrow">YOUR BIDBIDDER COMMAND CENTER</small><h1>Let's win some business.</h1><p>Source-linked opportunities, matches, applications and alerts in one place.</p></div><button class="btn primary" data-p="bids">Find new bids →</button></div>
  <div class="stats"><div><small>Open opportunities</small><strong>${a.count||0}</strong></div><div><small>Applications</small><strong>${b.count||0}</strong></div><div><small>Saved bids</small><strong>${c.count||0}</strong></div><div><small>Unread alerts</small><strong>${d.count||0}</strong></div></div>
- <div class="dashboard-grid"><div class="card"><div class="card-head"><h2>AI Match Center</h2><span class="status-dot">● LIVE</span></div><p>Score opportunities against your business profile and show the strongest matches first.</p><button class="btn dark" data-p="matches">View my matches →</button></div>
+ <div class="dashboard-grid"><div class="card"><div class="card-head"><h2>AI Match Center</h2><span class="status-dot">PROFILE-BASED</span></div><p>Score opportunities against your business profile and show the strongest matches first.</p><button class="btn dark" data-p="matches">View my matches →</button></div>
  <div class="card dark"><h2>AI Bid Agent</h2><p>Ask which bids fit, what the requirements mean, or what you should do next.</p><button class="btn primary" data-p="agent">Ask the AI Agent →</button></div></div>
  <div class="section-head"><h2>Opportunity sources</h2><p>BidBidder is now structured to bring in transportation, medical, healthcare, education and other procurement opportunities.</p></div>`)
  bindNav()
 }
 
 function opportunityCard(x:any,score?:number){
- return `<article class="opp"><div class="score">${score??'—'}<small>% MATCH</small></div><div class="opp-main"><div class="opp-top"><div><span class="tag">${esc(x.category||'Other')}</span><h2>${esc(x.title)}</h2><p><b>${esc(x.agency_name||'Buyer')}</b> · ${esc(x.location||'Location')}</p></div><strong>${x.deadline?'Due '+date(x.deadline):'Open'}</strong></div>
+ const scoreMarkup=score==null?'':'<div class="score">'+score+'<small>% MATCH</small></div>'
+ return `<article class="opp">${scoreMarkup}<div class="opp-main"><div class="opp-top"><div><span class="tag">${esc(x.category||'Other')}</span><h2>${esc(x.title)}</h2><p><b>${esc(x.agency_name||'Buyer')}</b> · ${esc(x.location||'Location')}</p></div><strong>${x.deadline?'Due '+date(x.deadline):'Open'}</strong></div>
  <p class="desc">${esc(x.description||'No description available.')}</p><div class="opp-meta"><span>Type: ${esc(x.opportunity_type||'RFP')}</span><span>Posted: ${date(x.posted_at)}</span>${x.estimated_value?'<span>Value: '+money(x.estimated_value)+'</span>':''}</div>
- <div class="opp-actions"><button class="btn primary apply" data-id="${x.id}">Start application</button><button class="btn ghost save" data-id="${x.id}">☆ Save</button>${safeUrl(x.source_url)?'<a class="btn ghost" target="_blank" rel="noopener noreferrer" href="'+esc(safeUrl(x.source_url))+'">View source ↗</a>':''}</div></div></article>`
+ <div class="opp-actions"><button class="btn primary apply" data-id="${x.id}">Start application</button><button class="btn ghost save" data-id="${x.id}">☆ Save</button>${safeUrl(x.source_url)?'<a class="btn ghost" target="_blank" rel="noopener noreferrer" href="'+esc(safeUrl(x.source_url))+'">View official source ↗</a>':''}</div></div></article>`
 }
 
 async function bids(){
@@ -236,8 +237,31 @@ async function notifications(){
 }
 
 async function agent(){
- shell('Bid Guidance Assistant','agent',`<div class="pageintro"><small class="eyebrow">ALWAYS-ON ASSISTANT</small><h1>Bid Guidance Assistant</h1><p>Ask about your best matches, requirements, application steps or deadlines.</p></div><div class="agent-wrap"><div class="chat" id="chat"><div class="bubble">Hi! I’m your BidBidder guidance assistant. I can summarize available opportunity records and explain your profile matches. Generative AI proposal drafting is not enabled yet.</div></div><form id="ask"><input id="question" placeholder="Ask: Which bids fit my business?"><button class="btn primary">Send</button></form></div>`)
- document.querySelector('#ask')!.addEventListener('submit',async e=>{e.preventDefault();const q=(document.querySelector('#question') as HTMLInputElement).value.trim();if(!q)return;const chat=document.querySelector('#chat')!;chat.innerHTML+='<div class="bubble user">'+esc(q)+'</div>';const r=await supabase.functions.invoke('bid-agent',{body:{message:q}});chat.innerHTML+='<div class="bubble">'+esc(r.data?.answer||r.error?.message||'I could not complete that request.')+'</div>';chat.scrollTop=chat.scrollHeight;(document.querySelector('#question') as HTMLInputElement).value='' })
+ shell('Bid Guidance Assistant','agent',`<div class="pageintro"><small class="eyebrow">PROFILE-BASED BID SUPPORT</small><h1>Bid Guidance Assistant</h1><p>Ask about matching opportunities, listed requirements, application steps or deadlines. Generative AI answers activate when the AI provider key is configured.</p></div><div class="agent-wrap"><div class="chat" id="chat"><div class="bubble">Hi! I can review the opportunity records in BidBidder and explain profile matches. I will clearly indicate whether a response uses generative AI or profile-based fallback guidance.</div></div><form id="ask"><input id="question" maxlength="2000" placeholder="Ask: Which bids fit my business?"><button class="btn primary" id="askButton">Send</button></form></div>`)
+ document.querySelector('#ask')!.addEventListener('submit',async e=>{
+  e.preventDefault()
+  const input=document.querySelector('#question') as HTMLInputElement
+  const button=document.querySelector('#askButton') as HTMLButtonElement
+  const q=input.value.trim()
+  if(!q)return
+  const chat=document.querySelector('#chat')!
+  chat.innerHTML+='<div class="bubble user">'+esc(q)+'</div>'
+  input.value=''
+  button.disabled=true
+  button.textContent='Thinking…'
+  try{
+   const r=await supabase.functions.invoke('bid-agent',{body:{message:q}})
+   const answer=r.error?(r.error.message||'The assistant could not complete that request.'):r.data?.answer||'No answer was returned.'
+   const mode=r.data?.ai_enabled?'Generative AI response':'Profile-based fallback'
+   chat.innerHTML+='<div class="bubble"><small>'+esc(mode)+'</small><p>'+esc(answer)+'</p></div>'
+  }catch(error:any){
+   chat.innerHTML+='<div class="bubble error">'+esc(error?.message||'Connection failed. Please try again.')+'</div>'
+  }finally{
+   button.disabled=false
+   button.textContent='Send'
+   chat.scrollTop=chat.scrollHeight
+  }
+ })
 }
 
 async function profile(){
