@@ -38,9 +38,9 @@ function landing(){
  root.innerHTML=`
  <div class="landing">
   <nav><div class="brand"><b>◆</b> Bid<span>Bidder</span></div><div><button class="btn ghost" id="login">Log in</button> <button class="btn primary" id="signup">Get started</button></div></nav>
-  <section class="hero"><div><small class="eyebrow">AI-POWERED BID DISCOVERY</small><h1>Find bids.<br><em>Win more business.</em></h1><p>BidBidder helps businesses discover real procurement opportunities, match them to your business, manage applications, and get AI guidance at every step.</p><div class="hero-actions"><button class="btn primary big" id="heroSignup">Start finding bids →</button></div><small>No complicated setup. Built for growing businesses.</small></div>
-  <div class="hero-card"><div class="mini-head"><b>AI Match Center</b><span class="live">● LIVE</span></div><div class="match"><div><b>Transportation Services</b><small>Government</small></div><strong>96%</strong></div><div class="match"><div><b>Medical Supply Contract</b><small>Healthcare</small></div><strong>91%</strong></div><div class="match"><div><b>Professional Services</b><small>Education</small></div><strong>87%</strong></div><div class="ai-tip">✦ <span>AI Agent: I can help you find, review and track opportunities.</span></div></div></section>
-  <section class="features"><div><span>01</span><h3>Real opportunities</h3><p>Browse procurement opportunities with source links and deadlines.</p></div><div><span>02</span><h3>Smart matching</h3><p>Match bids against your services, keywords and service areas.</p></div><div><span>03</span><h3>Application tracking</h3><p>Save bids, start applications and keep every deadline organized.</p></div><div><span>04</span><h3>AI bid agent</h3><p>Ask for bid guidance, requirements, next steps and best matches.</p></div></section>
+  <section class="hero"><div><small class="eyebrow">PROCUREMENT OPPORTUNITY DISCOVERY</small><h1>Find bids.<br><em>Win more business.</em></h1><p>BidBidder helps businesses discover real procurement opportunities, match them to your business, manage applications, and get AI guidance at every step.</p><div class="hero-actions"><button class="btn primary big" id="heroSignup">Start finding bids →</button></div><small>No complicated setup. Built for growing businesses.</small></div>
+  <div class="hero-card"><div class="mini-head"><b>AI Match Center</b><span class="live">PROFILE MATCHING</span></div><div class="match"><div><b>Transportation Services</b><small>Government</small></div><strong>Example</strong></div><div class="match"><div><b>Medical Supply Contract</b><small>Healthcare</small></div><strong>Example</strong></div><div class="match"><div><b>Professional Services</b><small>Education</small></div><strong>Example</strong></div><div class="ai-tip">✦ <span>AI Agent: I can help you find, review and track opportunities.</span></div></div></section>
+  <section class="features"><div><span>01</span><h3>Source-linked opportunities</h3><p>Browse source-linked procurement notices and deadlines. Confirm current status, amendments and eligibility with the buyer.</p></div><div><span>02</span><h3>Smart matching</h3><p>Match bids against your services, keywords and service areas.</p></div><div><span>03</span><h3>Application tracking</h3><p>Save bids, start applications and keep every deadline organized.</p></div><div><span>04</span><h3>AI bid agent</h3><p>Ask for bid guidance, requirements, next steps and best matches.</p></div></section>
   <section class="category-strip"><h2>Businesses BidBidder can help</h2><p>Start with your industry, then let BidBidder find opportunities that fit.</p><div class="category-grid"><button class="category-chip" data-category="Transportation & NEMT"><b>01</b><span>Transportation & NEMT</span> →</button><button class="category-chip" data-category="Medical Supplies & DME"><b>02</b><span>Medical Supplies & DME</span> →</button><button class="category-chip" data-category="Healthcare Services"><b>03</b><span>Healthcare Services</span> →</button><button class="category-chip" data-category="Adult Day & Human Services"><b>04</b><span>Adult Day & Human Services</span> →</button><button class="category-chip" data-category="Construction"><b>05</b><span>Construction</span> →</button><button class="category-chip" data-category="Facilities & Janitorial"><b>06</b><span>Facilities & Janitorial</span> →</button><button class="category-chip" data-category="Information Technology"><b>07</b><span>Information Technology</span> →</button><button class="category-chip" data-category="Education"><b>08</b><span>Education</span> →</button><button class="category-chip" data-category="Food Services"><b>09</b><span>Food Services</span> →</button><button class="category-chip" data-category="Security"><b>10</b><span>Security</span> →</button><button class="category-chip" data-category="Professional Services"><b>11</b><span>Professional Services</span> →</button><button class="category-chip" data-category="Other"><b>12</b><span>Other</span> →</button></div></section>
   <footer>© 2026 BidBidder. Find. Match. Win.</footer>
  </div>`
@@ -114,7 +114,7 @@ async function loadUnread(){if(!user)return;const r=await supabase.from('notific
 
 async function dashboard(){
  const [a,b,c,d]=await Promise.all([
-  supabase.from('bid_opportunities').select('*',{count:'exact',head:true}).eq('status','open'),
+  supabase.from('bid_opportunities').select('*',{count:'exact',head:true}).eq('status','open').or('deadline.is.null,deadline.gte.'+new Date().toISOString()),
   supabase.from('bid_applications').select('*',{count:'exact',head:true}).eq('user_id',user.id),
   supabase.from('saved_opportunities').select('*',{count:'exact',head:true}).eq('user_id',user.id),
   supabase.from('notifications').select('*',{count:'exact',head:true}).eq('user_id',user.id).is('read_at',null)
@@ -124,7 +124,7 @@ async function dashboard(){
  <div class="stats"><div><small>Open opportunities</small><strong>${a.count||0}</strong></div><div><small>Applications</small><strong>${b.count||0}</strong></div><div><small>Saved bids</small><strong>${c.count||0}</strong></div><div><small>Unread alerts</small><strong>${d.count||0}</strong></div></div>
  <div class="dashboard-grid"><div class="card"><div class="card-head"><h2>AI Match Center</h2><span class="status-dot">● LIVE</span></div><p>Score opportunities against your business profile and show the strongest matches first.</p><button class="btn dark" data-p="matches">View my matches →</button></div>
  <div class="card dark"><h2>AI Bid Agent</h2><p>Ask which bids fit, what the requirements mean, or what you should do next.</p><button class="btn primary" data-p="agent">Ask the AI Agent →</button></div></div>
- <div class="section-head"><h2>Connected bid sources</h2><p>BidBidder is now structured to bring in transportation, medical, healthcare, education and other procurement opportunities.</p></div>`)
+ <div class="section-head"><h2>Opportunity sources</h2><p>BidBidder is now structured to bring in transportation, medical, healthcare, education and other procurement opportunities.</p></div>`)
  bindNav()
 }
 
@@ -135,11 +135,11 @@ function opportunityCard(x:any,score?:number){
 }
 
 async function bids(){
- shell('Find Bids','bids',`<div class="pageintro"><small class="eyebrow">LIVE OPPORTUNITY MARKETPLACE</small><h1>Find Bids</h1><p>Search across connected opportunities and filter by industry, location and deadline.</p></div>
+ shell('Find Bids','bids',`<div class="pageintro"><small class="eyebrow">OPPORTUNITY MARKETPLACE</small><h1>Find Bids</h1><p>Search across connected opportunities and filter by industry, location and deadline.</p></div>
  <div class="toolbar"><input id="search" placeholder="Search title, buyer, keyword..."><select id="category"><option value="">All categories</option><option>Construction</option><option>Transportation</option><option>Medical Supplies</option><option>Healthcare Services</option><option>Professional Services</option><option>Facilities & Janitorial</option><option>Information Technology</option><option>Education</option><option>Food Services</option><option>Security</option><option>Other</option></select><select id="state"><option value="">All locations</option><option>Ohio</option><option>Nationwide</option><option>United States</option></select></div><div id="bidList">Loading opportunities...</div>`)
- const r=await supabase.from('bid_opportunities').select('*').eq('status','open').order('deadline',{ascending:true}).limit(100)
+ const r=await supabase.from('bid_opportunities').select('*').eq('status','open').or('deadline.is.null,deadline.gte.'+new Date().toISOString()).order('deadline',{ascending:true}).limit(100)
  if(r.error){shell('Find Bids','bids',`<div class="pageintro"><small class="eyebrow">OPPORTUNITY MARKETPLACE</small><h1>Find Bids</h1><div class="error">Bid data could not be loaded: ${esc(r.error.message)}. Your account is safe; this is a database access/configuration issue.</div><button class="btn primary" data-p="support">Contact support</button></div>`);return}
- const list=r.data||[]
+ const list=(r.data||[]).filter((x:any)=>!x.deadline||new Date(x.deadline).getTime()>=Date.now())
  const cats=[...new Set(list.map((x:any)=>x.category).filter(Boolean))] as string[]
  const sel=document.querySelector('#category') as HTMLSelectElement
  cats.forEach(c=>sel?.insertAdjacentHTML('beforeend','<option>'+esc(c)+'</option>'))
@@ -169,8 +169,8 @@ function scoreBid(o:any,p:any){
 }
 async function matches(){
  const {data:p}=await supabase.from('business_profiles').select('*').eq('user_id',user.id).maybeSingle()
- const r=await supabase.from('bid_opportunities').select('*').eq('status','open').order('deadline',{ascending:true}).limit(100)
- if(r.error){shell('AI Match Center','matches',`<div class="pageintro"><h1>AI Match Center</h1><div class="error">Matching could not load opportunities: ${esc(r.error.message)}</div></div>`);return}
+ const r=await supabase.from('bid_opportunities').select('*').eq('status','open').or('deadline.is.null,deadline.gte.'+new Date().toISOString()).order('deadline',{ascending:true}).limit(100)
+ if(r.error){shell('Profile Match Center','matches',`<div class="pageintro"><h1>Profile Match Center</h1><div class="error">Matching could not load opportunities: ${esc(r.error.message)}</div></div>`);return}
  const scored=(r.data||[]).map((x:any)=>({...x,...scoreBid(x,p)})).sort((a:any,b:any)=>b.score-a.score)
  for(const x of scored.slice(0,20)) await supabase.from('bid_matches').upsert({user_id:user.id,opportunity_id:x.id,match_score:x.score,match_reasons:x.reasons,status:'new'},{onConflict:'user_id,opportunity_id'})
  shell('AI Match Center','matches',`<div class="pageintro"><small class="eyebrow">PERSONALIZED MATCHING</small><h1>AI Match Center</h1><p>These scores use your business profile, services, keywords, service areas and industry.</p></div><div class="card"><b>${scored.length}</b> open opportunities scored for you. <button class="btn ghost" data-p="profile">Improve my profile</button></div><div class="opp-list" style="margin-top:15px">${scored.slice(0,20).map((x:any)=>opportunityCard(x,x.score)).join('')}</div>`)
@@ -217,12 +217,26 @@ async function listPage(p:string){
 
 async function notifications(){
  const r=await supabase.from('notifications').select('*').eq('user_id',user.id).order('created_at',{ascending:false}).limit(100)
- shell('Notifications','notifications',`<div class="pageintro"><small class="eyebrow">ALERT CENTER</small><h1>Notifications</h1><p>New saves, application activity and deadline reminders appear here.</p></div><div class="card list-card">${r.data?.length?r.data.map((x:any)=>'<div class="list-row"><div><b>'+esc(x.title)+'</b><span>'+esc(x.message||'')+'</span></div><small>'+date(x.created_at)+'</small></div>').join(''):'<div class="empty">No notifications yet.</div>'}</div>`)
- if(r.data?.some((x:any)=>!x.read_at))await supabase.from('notifications').update({read_at:new Date().toISOString()}).eq('user_id',user.id).is('read_at',null)
+ if(r.error){shell('Notifications','notifications',`<div class="pageintro"><h1>Notifications</h1><div class="error">${esc(r.error.message)}</div></div>`);return}
+ const unread=(r.data||[]).filter((x:any)=>!x.read_at).length
+ const rows=(r.data||[]).map((x:any)=>'<div class="list-row"><div><b>'+esc(x.title||'Update')+'</b><span>'+esc(x.message||'')+'</span><small>'+date(x.created_at)+'</small></div><div>'+(x.read_at?'<span class="tag">Read</span>':'<button class="btn ghost mark-notification" data-id="'+esc(x.id)+'">Mark read</button>')+'</div></div>').join('')
+ shell('Notifications','notifications',`<div class="pageintro"><small class="eyebrow">ALERT CENTER</small><h1>Notifications</h1><p>Application activity, saved bids and deadline reminders.</p>${unread?'<button class="btn ghost" id="markAllRead">Mark all as read</button>':''}</div><div class="card list-card">${rows||'<div class="empty">No notifications yet.</div>'}</div>`)
+ document.querySelectorAll<HTMLButtonElement>('.mark-notification').forEach(button=>button.addEventListener('click',async()=>{
+  const result=await supabase.from('notifications').update({read_at:new Date().toISOString()}).eq('id',button.dataset.id).eq('user_id',user.id)
+  if(result.error){toast(result.error.message,true);return}
+  await notifications()
+ }))
+ document.querySelector('#markAllRead')?.addEventListener('click',async()=>{
+  const result=await supabase.from('notifications').update({read_at:new Date().toISOString()}).eq('user_id',user.id).is('read_at',null)
+  if(result.error){toast(result.error.message,true);return}
+  toast('All notifications marked as read.')
+  await notifications()
+ })
+ loadUnread()
 }
 
 async function agent(){
- shell('AI Bid Agent','agent',`<div class="pageintro"><small class="eyebrow">ALWAYS-ON ASSISTANT</small><h1>AI Bid Agent</h1><p>Ask about your best matches, requirements, application steps or deadlines.</p></div><div class="agent-wrap"><div class="chat" id="chat"><div class="bubble">Hi! I’m your BidBidder AI Agent. I can review your current opportunities and help you decide what to do next.</div></div><form id="ask"><input id="question" placeholder="Ask: Which bids fit my business?"><button class="btn primary">Send</button></form></div>`)
+ shell('Bid Guidance Assistant','agent',`<div class="pageintro"><small class="eyebrow">ALWAYS-ON ASSISTANT</small><h1>Bid Guidance Assistant</h1><p>Ask about your best matches, requirements, application steps or deadlines.</p></div><div class="agent-wrap"><div class="chat" id="chat"><div class="bubble">Hi! I’m your BidBidder guidance assistant. I can summarize available opportunity records and explain your profile matches. Generative AI proposal drafting is not enabled yet.</div></div><form id="ask"><input id="question" placeholder="Ask: Which bids fit my business?"><button class="btn primary">Send</button></form></div>`)
  document.querySelector('#ask')!.addEventListener('submit',async e=>{e.preventDefault();const q=(document.querySelector('#question') as HTMLInputElement).value.trim();if(!q)return;const chat=document.querySelector('#chat')!;chat.innerHTML+='<div class="bubble user">'+esc(q)+'</div>';const r=await supabase.functions.invoke('bid-agent',{body:{message:q}});chat.innerHTML+='<div class="bubble">'+esc(r.data?.answer||r.error?.message||'I could not complete that request.')+'</div>';chat.scrollTop=chat.scrollHeight;(document.querySelector('#question') as HTMLInputElement).value='' })
 }
 
