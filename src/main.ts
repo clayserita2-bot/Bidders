@@ -128,6 +128,18 @@ async function dashboard(){
  bindNav()
 }
 
+function officialSources(){
+ return `<div class="source-directory">
+  <h2>Check official procurement sources</h2>
+  <p>BidBidder's opportunity feed is being connected. Until listings are imported and verified, use these official portals directly rather than relying on sample or unverified bids.</p>
+  <div class="source-links">
+   <a class="source-link" href="https://sam.gov/opportunities" target="_blank" rel="noopener noreferrer"><b>Federal contracts — SAM.gov ↗</b><span>Search federal solicitations, pre-solicitations and notices.</span></a>
+   <a class="source-link" href="https://ohiobuys.ohio.gov/" target="_blank" rel="noopener noreferrer"><b>Ohio state bids — OhioBuys ↗</b><span>Open Public Solicitations to search State of Ohio opportunities.</span></a>
+   <a class="source-link" href="https://www.cuyahogacounty.gov/publicworks/work-with-us/open-and-upcoming-bids" target="_blank" rel="noopener noreferrer"><b>Cuyahoga County bids ↗</b><span>Review open and upcoming County contracting opportunities.</span></a>
+  </div>
+ </div>`
+}
+
 function opportunityCard(x:any,score?:number){
  const scoreMarkup=score==null?'':'<div class="score">'+score+'<small>% MATCH</small></div>'
  return `<article class="opp">${scoreMarkup}<div class="opp-main"><div class="opp-top"><div><span class="tag">${esc(x.category||'Other')}</span><h2>${esc(x.title)}</h2><p><b>${esc(x.agency_name||'Buyer')}</b> · ${esc(x.location||'Location')}</p></div><strong>${x.deadline?'Due '+date(x.deadline):'Open'}</strong></div>
@@ -149,7 +161,7 @@ async function bids(){
   const cat=sel.value.toLowerCase(),loc=(document.querySelector('#state') as HTMLSelectElement).value.toLowerCase()
   const filtered=list.filter((x:any)=>{const hay=[x.title,x.agency_name,x.description,x.category,x.location,...(x.keywords||[])].join(' ').toLowerCase();return (!q||hay.includes(q))&&(!cat||String(x.category).toLowerCase()===cat)&&(!loc||hay.includes(loc))})
   const el=document.querySelector('#bidList')!
-  el.innerHTML=filtered.length?'<div class="opp-list">'+filtered.map(x=>opportunityCard(x)).join('')+'</div>':'<div class="empty">No open opportunities match those filters.</div>'
+  el.innerHTML=filtered.length?'<div class="opp-list">'+filtered.map(x=>opportunityCard(x)).join('')+'</div>':(list.length?'<div class="empty">No open opportunities match those filters.</div>':officialSources())
   bindBidButtons()
  }
  document.querySelector('#search')?.addEventListener('input',draw);sel?.addEventListener('change',draw);document.querySelector('#state')?.addEventListener('change',draw);draw()
